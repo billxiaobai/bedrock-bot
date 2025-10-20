@@ -12,12 +12,6 @@ class BotComponent extends EventEmitter {
         this.timeouts = [];
     }
 
-    async onEnable() {
-    }
-
-    async onDisable() {
-    }
-
     cleanup() {
         this.clearIntervals();
         this.clearTimeouts();
@@ -77,5 +71,4 @@ class BotComponent extends EventEmitter {
         return this.enabled;
     }
 }
-
 module.exports = BotComponent;

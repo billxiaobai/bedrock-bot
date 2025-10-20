@@ -1,7 +1,7 @@
 class Logger {
     constructor(options = {}) {
         const defaultOptions = {
-            level: 'info',
+            level: 'info',   // debug | info | warn | error
             console: true
         };
         this.options = Object.assign(defaultOptions, options);
@@ -61,10 +61,10 @@ class Logger {
 
     getLevelColor(level) {
         switch (level) {
-            case 'debug': return '\x1b[34m';
-            case 'info': return '\x1b[36m';
-            case 'warn': return '\x1b[33m';
-            case 'error': return '\x1b[31m';
+            case 'debug': return '\x1b[34m'; // blue
+            case 'info': return '\x1b[36m';  // cyan
+            case 'warn': return '\x1b[33m';  // yellow
+            case 'error': return '\x1b[31m'; // red
             default: return '\x1b[37m';
         }
     }

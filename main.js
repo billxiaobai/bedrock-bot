@@ -1,7 +1,6 @@
 const BedrockBot = require('./src/BedrockBot');
 const readline = require('readline');
 const path = require('path');
-
 class BotApplication {
     constructor() {
         this.bot = null;
@@ -9,7 +8,6 @@ class BotApplication {
         this.setupGracefulShutdown();
         this.setupCommandInterface();
     }
-
     setupGracefulShutdown() {
         const gracefulShutdown = async (signal) => {
             console.log(`\nReceived ${signal}, shutting down gracefully...`);
@@ -27,9 +25,10 @@ class BotApplication {
 
         process.on('SIGINT', gracefulShutdown);
         process.on('SIGTERM', gracefulShutdown);
-        process.on('SIGUSR2', gracefulShutdown);
+        process.on('SIGUSR2', gracefulShutdown); 
     }
 
+    
     setupCommandInterface() {
         this.rl = readline.createInterface({
             input: process.stdin,
@@ -42,6 +41,9 @@ class BotApplication {
         });
     }
 
+    /**
+     * @param {string} input - User input
+     */
     async handleCommand(input) {
         const command = input.trim();
 
@@ -59,6 +61,10 @@ class BotApplication {
         this.rl.prompt();
     }
 
+    /**
+     * Handle chat messages
+     * @param {string} message - Chat message
+     */
     async handleChatMessage(message) {
         if (this.bot && this.bot.isConnected) {
             await this.bot.chat(message);
@@ -66,17 +72,12 @@ class BotApplication {
             console.log('Bot is not connected. Cannot send chat message.');
         }
     }
-
     async start() {
         try {
-            console.log('Starting Bedrock Bot Application...');
-
-            this.bot = new BedrockBot('./config.json');
-
+            console.log('Starting Bedrock Bot Application...');         
+            this.bot = new BedrockBot('./config.json');           
             this.setupBotEventListeners();
-
             await this.bot.start();
-
             this.rl.prompt();
 
         } catch (error) {
@@ -84,7 +85,6 @@ class BotApplication {
             process.exit(1);
         }
     }
-
     setupBotEventListeners() {
         if (!this.bot) return;
 
@@ -109,10 +109,12 @@ class BotApplication {
         });
 
         this.bot.on('message', (data) => {
+           
             this.rl.prompt();
         });
     }
 }
+
 
 if (require.main === module) {
     const app = new BotApplication();
@@ -120,3 +122,15 @@ if (require.main === module) {
 }
 
 module.exports = BotApplication;
+try {
+  require('./Multiple instances/Launcher.js');
+} catch (err) {
+  console.error('Failed to start launcher:', err && err.message ? err.message : err);
+  process.exit(1);
+}
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err && err.stack ? err.stack : err);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Rejection:', reason);
+});

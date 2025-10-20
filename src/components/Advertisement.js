@@ -4,23 +4,19 @@ class Advertisement extends BotComponent {
     constructor(bot, config, logger) {
         super('advertisement', bot, config, logger);
         this.activeIntervals = new Map();
-
         const msgs = this.getConfigValue('advertisement.messages') ||
                      this.getConfigValue('features.advertisement.messages') ||
                      this.getConfigValue('advertisement')?.messages ||
                      [];
         this.messages = Array.isArray(msgs) ? msgs : [];
     }
-
     getConfigValue(path) {
         if (!this.config || typeof this.config.get !== 'function') return undefined;
-
         try {
             const direct = this.config.get(path);
             if (direct !== undefined) return direct;
         } catch (e) {
         }
-
         const parts = path.split('.');
         try {
             let val = this.config.get(parts[0]);
@@ -84,6 +80,7 @@ class Advertisement extends BotComponent {
     }
 
     setupAdvertisements() {
+        // 先清掉舊的再建立新的（避免重覆）
         this.clearAllIntervals();
         this.messages.forEach((message, index) => {
             this.createAdvertisementInterval(message, index);
@@ -140,7 +137,6 @@ class Advertisement extends BotComponent {
         }
 
         const message = this.messages[index];
-        
         if (this.activeIntervals.has(index)) {
             clearInterval(this.activeIntervals.get(index));
             this.activeIntervals.delete(index);

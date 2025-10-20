@@ -32,7 +32,6 @@ class ConfigManager {
         if (missing.length > 0) {
             throw new Error(`Missing required configuration sections: ${missing.join(', ')}`);
         }
-
         if (!this.config.bot.host || !this.config.bot.username) {
             throw new Error('Bot configuration must include host and username');
         }
@@ -52,7 +51,6 @@ class ConfigManager {
             });
         }
     }
-
     get(path, defaultValue = null) {
         const keys = path.split('.');
         let value = this.config;

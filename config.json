@@ -1,29 +1,118 @@
-{
-  "bot": {
-    "host": "",
-    "port": 19132,
-    "username": "",
-    "offline": false,
-    "version": "1.21.100"
+[
+  {
+    "bot": {
+      "username": "xibot004",
+      "offline": false,
+      "version": "1.21.111"
+    },
+    "features": {
+      "autoReconnect": {
+        "enabled": true,
+        "delay": 5000,
+        "maxRetries": 20
+      },
+      "advertisement": {
+        "enabled": false,
+        "messages": [
+          {
+            "text": "test123",
+            "interval": 300000
+          }
+        ]
+      },
+      "teleport": {
+        "enabled": true,
+        "allowedPlayers": [
+          "xiaobai8088"
+        ]
+      }
+    }
   },
-  "features": {
-    "autoReconnect": {
-      "enabled": true,
-      "delay": 5000,
-      "maxRetries": 20
+  {
+    "bot": {
+      "username": "xibot005",
+      "offline": false,
+      "version": "1.21.111"
     },
-    "advertisement": {
-      "enabled": false,
-      "messages": [
-        {
-          "text": "test123",
-          "interval": 300000
-        }
-      ]
+    "features": {
+      "autoReconnect": {
+        "enabled": true,
+        "delay": 5000,
+        "maxRetries": 20
+      },
+      "advertisement": {
+        "enabled": false,
+        "messages": [
+          {
+            "text": "test123",
+            "interval": 300000
+          }
+        ]
+      },
+      "teleport": {
+        "enabled": true,
+        "allowedPlayers": [
+          "xiaobai8088"
+        ]
+      }
+    }
+  },
+  {
+    "bot": {
+      "username": "xibot006",
+      "offline": false,
+      "version": "1.21.111"
     },
-    "teleport": {
-      "enabled": true,
-      "allowedPlayers": ["xiaobai8088"]
+    "features": {
+      "autoReconnect": {
+        "enabled": true,
+        "delay": 5000,
+        "maxRetries": 20
+      },
+      "advertisement": {
+        "enabled": false,
+        "messages": [
+          {
+            "text": "test123",
+            "interval": 300000
+          }
+        ]
+      },
+      "teleport": {
+        "enabled": true,
+        "allowedPlayers": [
+          "xiaobai8088"
+        ]
+      }
+    }
+  },
+   {
+    "bot": {
+      "username": "xibot007",
+      "offline": false,
+      "version": "1.21.111"
+    },
+    "features": {
+      "autoReconnect": {
+        "enabled": true,
+        "delay": 5000,
+        "maxRetries": 20
+      },
+      "advertisement": {
+        "enabled": false,
+        "messages": [
+          {
+            "text": "test123",
+            "interval": 300000
+          }
+        ]
+      },
+      "teleport": {
+        "enabled": true,
+        "allowedPlayers": [
+          "xiaobai8088"
+        ]
+      }
     }
   }
-}
+]
