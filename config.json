@@ -1,0 +1,29 @@
+{
+  "bot": {
+    "host": "",
+    "port": 19132,
+    "username": "",
+    "offline": false,
+    "version": "1.21.100"
+  },
+  "features": {
+    "autoReconnect": {
+      "enabled": true,
+      "delay": 5000,
+      "maxRetries": 20
+    },
+    "advertisement": {
+      "enabled": false,
+      "messages": [
+        {
+          "text": "test123",
+          "interval": 300000
+        }
+      ]
+    },
+    "teleport": {
+      "enabled": true,
+      "allowedPlayers": ["xiaobai8088"]
+    }
+  }
+}
