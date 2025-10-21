@@ -69,7 +69,6 @@ statusServer.start('0.0.0.0', 8080);
                         }
                     }
                 };
-                // helper
                 function formatArgs(level, arr) {
                     const txt = arr.map(a => {
                         if (a instanceof Error) return `${a.message}\n${a.stack || ''}`;
@@ -80,10 +79,10 @@ statusServer.start('0.0.0.0', 8080);
                 try {
                   if (typeof bot.on === 'function') {
                     onMessage = (data) => { try { logEmitter.emit('log', { id: `instance-${idx}`, text: `[CHAT] ${data && data.text ? data.text : JSON.stringify(data)}` }); } catch (e) {} };
-                    onSpawn = () => { try { logEmitter.emit('log', { id: `instance-${idx}`, text: '[INFO] Bot spawned' }); } catch (e) {} };
-                    onDisconnect = (reason) => { try { logEmitter.emit('log', { id: `instance-${idx}`, text: `[WARN] Bot disconnected: ${reason}` }); } catch (e) {} };
-                    onError = (err) => { try { logEmitter.emit('log', { id: `instance-${idx}`, text: `[ERROR] ${err && err.message ? err.message : err}` }); } catch (e) {} };
-                    onKick = (reason) => { try { logEmitter.emit('log', { id: `instance-${idx}`, text: `[WARN] Bot kicked: ${reason}` }); } catch (e) {} };
+                    onSpawn = () => { try { logEmitter.emit('log', { id: `instance-${idx}`, text: '[INFO] Bot spawned' }); logEmitter.emit('spawn'); } catch (e) {} };
+                    onDisconnect = (reason) => { try { logEmitter.emit('log', { id: `instance-${idx}`, text: `[WARN] Bot disconnected: ${reason}` }); logEmitter.emit('disconnect', reason); } catch (e) {} };
+                    onError = (err) => { try { logEmitter.emit('log', { id: `instance-${idx}`, text: `[ERROR] ${err && err.message ? err.message : err}` }); logEmitter.emit('error', err); } catch (e) {} };
+                    onKick = (reason) => { try { logEmitter.emit('log', { id: `instance-${idx}`, text: `[WARN] Bot kicked: ${reason}` }); logEmitter.emit('kick', reason); } catch (e) {} };
 
                     bot.on('message', onMessage);
                     bot.on('spawn', onSpawn);
@@ -138,10 +137,10 @@ statusServer.start('0.0.0.0', 8080);
         try {
           if (typeof bot.on === 'function') {
             const onMessage = (data) => { try { logEmitter.emit('log', `[CHAT] ${data && data.text ? data.text : JSON.stringify(data)}`); } catch (e) {} };
-            const onSpawn = () => { try { logEmitter.emit('log', '[INFO] Bot spawned'); } catch (e) {} };
-            const onDisconnect = (reason) => { try { logEmitter.emit('log', `[WARN] Bot disconnected: ${reason}`); } catch (e) {} };
-            const onError = (err) => { try { logEmitter.emit('log', `[ERROR] ${err && err.message ? err.message : err}`); } catch (e) {} };
-            const onKick = (reason) => { try { logEmitter.emit('log', `[WARN] Bot kicked: ${reason}`); } catch (e) {} };
+            const onSpawn = () => { try { logEmitter.emit('log', '[INFO] Bot spawned'); logEmitter.emit('spawn'); } catch (e) {} };
+            const onDisconnect = (reason) => { try { logEmitter.emit('log', `[WARN] Bot disconnected: ${reason}`); logEmitter.emit('disconnect', reason); } catch (e) {} };
+            const onError = (err) => { try { logEmitter.emit('log', `[ERROR] ${err && err.message ? err.message : err}`); logEmitter.emit('error', err); } catch (e) {} };
+            const onKick = (reason) => { try { logEmitter.emit('log', `[WARN] Bot kicked: ${reason}`); logEmitter.emit('kick', reason); } catch (e) {} };
             bot.on('message', onMessage);
             bot.on('spawn', onSpawn);
             bot.on('disconnect', onDisconnect);
@@ -177,7 +176,6 @@ statusServer.start('0.0.0.0', 8080);
         process.exit(1);
     }
 
-    // 優雅停止
     const shutdown = async () => {
         console.log('Shutting down instances...');
         for (let i = 0; i < instances.length; i++) {
@@ -188,9 +186,9 @@ statusServer.start('0.0.0.0', 8080);
             } catch (e) {
                 console.error(`[Instance ${i}] stop error:`, e.message || e);
             }
-            
+
             if (b._statusId) statusServer.unregisterInstance(b._statusId);
-           
+
             if (b._forwardListeners && typeof b.removeListener === 'function') {
               try {
                 b.removeListener('message', b._forwardListeners.onMessage);

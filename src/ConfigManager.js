@@ -6,7 +6,7 @@ class ConfigManager {
         this.configPath = configPath;
         this.config = null;
         this.watchers = [];
-        
+
         this.loadConfig();
         this.setupConfigWatcher();
     }
@@ -28,7 +28,7 @@ class ConfigManager {
     validateConfig() {
         const required = ['bot', 'features', 'logging'];
         const missing = required.filter(key => !this.config[key]);
-        
+
         if (missing.length > 0) {
             throw new Error(`Missing required configuration sections: ${missing.join(', ')}`);
         }

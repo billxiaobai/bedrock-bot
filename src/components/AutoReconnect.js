@@ -28,7 +28,6 @@ class AutoReconnect extends BotComponent {
         this.attemptReconnect(reason instanceof Error ? reason : new Error(reason || 'Unknown reason'));
     }
 
-    // 小 helper：與 BedrockBot 同步的忽略規則
     shouldIgnoreError(error) {
         if (!error) return false;
         const msg = (error && (error.message || String(error))) || String(error);
@@ -41,20 +40,16 @@ class AutoReconnect extends BotComponent {
         return patterns.some(re => re.test(msg));
     }
 
-    // 修改：在偵測到錯誤時使用實例的 ipModule 切換 IP（若可用），並增加 debug 日誌
     handleError(error) {
         if (this.isReconnecting) return;
 
         const name = this.bot?.config?.get && this.bot.config.get('bot.username') || (this.bot?.client && this.bot.client.username) || 'unknown';
 
-        // 先判斷是否忽略（若有相同規則）
         if (this.shouldIgnoreError && this.shouldIgnoreError(error)) {
-            // 仍嘗試重連，但不輸出錯誤到終端
         } else {
             this.logger.error(`[${name}] Bot error detected by AutoReconnect: ${error && error.message ? error.message : String(error)}`);
         }
 
-        // 若為可切換的錯誤（含 Ping timed out）則嘗試用該實例的 ipModule 切換 IP
         try {
             const msg = error && (error.message || String(error)) || '';
             if (msg.toLowerCase().includes('ping timed out') || msg.includes('Connect timed out') || msg.includes('ETIMEDOUT') || msg.includes('ECONNREFUSED')) {
@@ -71,7 +66,6 @@ class AutoReconnect extends BotComponent {
             this.logger.debug && this.logger.debug(`[${name}] AutoReconnect ip switch failed: ${e && e.message ? e.message : e}`);
         }
 
-        // 只有在非已連線狀態下才嘗試 reconnect
         if (!this.bot.isConnected && (
             (error && error.message && (
                 error.message.includes('Connect timed out') ||
@@ -87,11 +81,10 @@ class AutoReconnect extends BotComponent {
     handleLogin() {
         const name = this.bot?.config?.get && this.bot.config.get('bot.username') || (this.bot?.client && this.bot.client.username) || 'unknown';
         this.logger.info(`[${name}] Bot successfully spawned/connected`);
-        this.retryCount = 0; // Reset retry count on successful connection
+        this.retryCount = 0;
         this.isReconnecting = false;
     }
 
-    // 修改：在 attemptReconnect 增加 username, 更清楚記錄，並 emit 帶上實例名稱
     attemptReconnect(lastError = null) {
         const name = this.bot?.config?.get && this.bot.config.get('bot.username') || (this.bot?.client && this.bot.client.username) || 'unknown';
 
@@ -109,11 +102,9 @@ class AutoReconnect extends BotComponent {
 
         this.createTimeout(() => {
             try {
-                // emit 帶上實例 name，BedrockBot 會接收並以該實例為主處理
                 this.emit('reconnectAttempt', this.retryCount, lastError, name);
             } catch (error) {
                 this.logger.error(`[${name}] Reconnect attempt ${this.retryCount} failed to start: ${error && error.message ? error.message : error}`);
-                // 安全地 schedule 下一次嘗試
                 setTimeout(() => {
                     this.attemptReconnect(error);
                 }, this.delay);

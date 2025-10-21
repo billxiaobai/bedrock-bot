@@ -80,7 +80,6 @@ class Advertisement extends BotComponent {
     }
 
     setupAdvertisements() {
-        // 先清掉舊的再建立新的（避免重覆）
         this.clearAllIntervals();
         this.messages.forEach((message, index) => {
             this.createAdvertisementInterval(message, index);

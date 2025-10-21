@@ -28,7 +28,7 @@ class BedrockBot extends EventEmitter {
 		try {
 			const cfgType = typeof configInput === 'string' ? `path:${configInput}` : 'object';
 			this.logger.info(`BedrockBot constructor called (config=${cfgType}, pid=${process.pid})`);
-		} catch (e) { /* ignore logger errors */ }
+		} catch (e) { }
 
 		this.initialize();
 	}
@@ -53,7 +53,7 @@ class BedrockBot extends EventEmitter {
 
 				this.config = {
 					get: (key, def) => getNested(parsed, key, def),
-					addWatcher: (fn) => { /* no-op */ },
+					addWatcher: (fn) => { },
 					isFeatureEnabled: (name) => {
 						const features = getNested(parsed, 'features') || getNested(parsed, 'components') || {};
 						return !!features[name];
@@ -104,7 +104,7 @@ class BedrockBot extends EventEmitter {
 			try {
 				const username = (this.config && typeof this.config.get === 'function') ? this.config.get('bot.username') : undefined;
 				this.logger.info(`BedrockBot initialized (username=${username || 'unknown'})`);
-			} catch (e) {}
+			} catch (e) { }
 		} catch (error) {
 			this.logger = Logger;
 			const isMissingRequired = error && error.message && error.message.includes('Missing required configuration sections');
@@ -115,7 +115,7 @@ class BedrockBot extends EventEmitter {
 					const parsed = JSON.parse(raw);
 					this.config = {
 						get: (key) => parsed[key],
-						addWatcher: (fn) => { /* no-op */ },
+						addWatcher: (fn) => { },
 						isFeatureEnabled: (name) => {
 							const features = parsed.features || parsed.components || {};
 							return !!features[name];
@@ -218,7 +218,7 @@ class BedrockBot extends EventEmitter {
 					clearTimeout(timeout);
 					try {
 						if (clientRef && typeof clientRef.removeListener === 'function') clientRef.removeListener('error', onError);
-					} catch (e) { /* ignore */ }
+					} catch (e) { }
 					resolve();
 				};
 
@@ -226,7 +226,7 @@ class BedrockBot extends EventEmitter {
 					clearTimeout(timeout);
 					try {
 						if (clientRef && typeof clientRef.removeListener === 'function') clientRef.removeListener('spawn', onSpawn);
-					} catch (e) { /* ignore */ }
+					} catch (e) { }
 
 					if (error && error.message && (
 						error.message.includes('Connect timed out') ||
@@ -279,7 +279,7 @@ class BedrockBot extends EventEmitter {
 		this.logger.info('Bot successfully spawned in the world');
 
 		const welcomeMessage = `[${moment().tz('Asia/Taipei').format('HH:mm:ss')}] XIBOT 已上線！`;
-		try { await this.chat(welcomeMessage); } catch (e) {}
+		try { await this.chat(welcomeMessage); } catch (e) { }
 		await this.reinitializeComponents();
 		this.emit('spawn', packet);
 	}
@@ -509,7 +509,7 @@ class BedrockBot extends EventEmitter {
 		this.logger.info('Disconnecting bot...');
 		this.cleanupComponents();
 		if (this.client) {
-			try { this.client.disconnect(); } catch (e) {}
+			try { this.client.disconnect(); } catch (e) { }
 			this.client = null;
 		}
 		this.isConnected = false;

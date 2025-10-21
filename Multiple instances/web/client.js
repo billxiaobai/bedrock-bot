@@ -1,10 +1,8 @@
 (async () => {
   const container = document.getElementById('container');
 
- 
   const createdIds = new Set();
 
-  
   function escapeHtml(s) {
     return String(s || '')
       .replace(/&/g, '&amp;')
@@ -12,7 +10,6 @@
       .replace(/>/g, '&gt;');
   }
 
- 
   function ansiToHtml(input) {
     if (!input) return '';
     const colorMap = {
@@ -28,14 +25,12 @@
     let lastIndex = 0;
     let match;
     while ((match = regex.exec(input)) !== null) {
-      
       const chunk = input.substring(lastIndex, match.index);
       result += escapeHtml(chunk);
       lastIndex = regex.lastIndex;
 
       const codes = match[1].split(';').map(n => parseInt(n, 10) || 0);
 
-      
       if (codes.includes(0)) {
         while (openStack.length) {
           result += openStack.pop();
@@ -43,7 +38,6 @@
         continue;
       }
 
-      
       let styles = [];
       codes.forEach(c => {
         if (c === 1) styles.push('font-weight:700');
@@ -54,7 +48,6 @@
           const col = colorMap[c];
           if (col) styles.push(`color:${col}`);
         } else if (c === 39) {
-          
           while (openStack.length) {
             result += openStack.pop();
           }
@@ -67,9 +60,8 @@
       }
     }
 
-    
     result += escapeHtml(input.substring(lastIndex));
-   
+
     while (openStack.length) result += openStack.pop();
     return result.replace(/\r?\n/g, '<br>');
   }
@@ -98,17 +90,42 @@
     const win = document.createElement('div');
     win.className = 'win';
     win.style.position = 'relative';
- 
+
     win.style.width = '360px';
     win.style.height = '260px';
 
     const title = document.createElement('div');
     title.className = 'title';
+    title.style.position = 'relative';
     const left = document.createElement('div');
     left.style.display = 'flex';
     left.style.alignItems = 'center';
     left.innerText = id;
     title.appendChild(left);
+
+    const statusWrap = document.createElement('div');
+    statusWrap.style.position = 'absolute';
+    statusWrap.style.left = '50%';
+    statusWrap.style.top = '50%';
+    statusWrap.style.transform = 'translate(-50%, -50%)';
+    statusWrap.style.pointerEvents = 'none';
+    statusWrap.style.display = 'flex';
+    statusWrap.style.alignItems = 'center';
+    statusWrap.style.gap = '6px';
+    const statusSquare = document.createElement('span');
+    statusSquare.style.display = 'inline-block';
+    statusSquare.style.width = '10px';
+    statusSquare.style.height = '10px';
+    statusSquare.style.borderRadius = '2px';
+    statusSquare.style.backgroundColor = '#e74c3c';
+    const statusText = document.createElement('span');
+    statusText.style.fontSize = '12px';
+    statusText.style.color = '#ffffff';
+    statusText.style.opacity = '0.9';
+    statusText.textContent = 'stop';
+    statusWrap.appendChild(statusSquare);
+    statusWrap.appendChild(statusText);
+    title.appendChild(statusWrap);
 
     if (meta && meta.bot && meta.bot.username) {
       const m = document.createElement('span');
@@ -212,7 +229,7 @@
     document.addEventListener('mousemove', (e) => {
       if (isResizingV) {
         const dy = e.clientY - resizeStartY;
-        const newH = Math.max(80, resizeStartHeight + dy); 
+        const newH = Math.max(80, resizeStartHeight + dy);
         win.style.height = newH + 'px';
       }
     });
@@ -259,7 +276,7 @@
     });
     let es = null;
     let sseRetryTimer = null;
-    const sseRetryDelay = 3000; 
+    const sseRetryDelay = 3000;
 
     function cleanupSSE() {
       if (es) {
@@ -283,6 +300,8 @@
         return;
       }
 
+      es.onopen = () => {};
+
       es.addEventListener('meta', (ev) => {
         try {
           const m = JSON.parse(ev.data);
@@ -296,16 +315,51 @@
         } catch (e) {}
       });
 
+      es.addEventListener('status', (ev) => {
+        try {
+          const st = JSON.parse(ev.data || '{}');
+          if (st && typeof st.connected !== 'undefined') {
+            if (st.connected) {
+              statusSquare.style.backgroundColor = '#2ecc71';
+              statusText.textContent = 'online';
+            } else {
+              statusSquare.style.backgroundColor = '#e74c3c';
+              statusText.textContent = 'stop';
+            }
+          }
+        } catch (e) {}
+      });
+
+      function setStatusOnline() {
+        statusSquare.style.backgroundColor = '#2ecc71';
+        statusText.textContent = 'online';
+      }
+      function setStatusOffline() {
+        statusSquare.style.backgroundColor = '#e74c3c';
+        statusText.textContent = 'stop';
+      }
+
       es.onmessage = (ev) => {
         try {
           const obj = JSON.parse(ev.data);
           if (obj.id && obj.id !== id) {
-            return; 
+            return;
           }
           const time = new Date(obj.ts).toLocaleTimeString();
           const html = ansiToHtml(obj.text);
           content.innerHTML += `<div>${escapeHtml(time)} ${html}</div>`;
           content.scrollTop = content.scrollHeight;
+
+          try {
+            const txt = (obj.text || '').toLowerCase();
+            if (txt.includes('bot spawned')) {
+              setStatusOnline();
+            } else if (txt.includes('bot disconnected') || txt.includes('bot kicked') || txt.includes('bot connection ended') || txt.includes('[sse disconnected]') || txt.includes('sse disconnected')) {
+              setStatusOffline();
+            } else if (txt.includes('[error]') && txt.includes('start error')) {
+              setStatusOffline();
+            }
+          } catch (e) {}
         } catch (e) {
           content.innerHTML += `<div>${escapeHtml(ev.data)}</div>`;
           content.scrollTop = content.scrollHeight;
@@ -315,6 +369,7 @@
       es.onerror = (ev) => {
         content.innerHTML += `<div>[SSE disconnected] retrying in ${sseRetryDelay/1000}s...</div>`;
         content.scrollTop = content.scrollHeight;
+        try { setStatusOffline(); } catch (e) {}
         cleanupSSE();
         sseRetryTimer = setTimeout(connectSSE, sseRetryDelay);
       };
